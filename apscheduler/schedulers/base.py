@@ -964,14 +964,14 @@ class BaseScheduler(six.with_metaclass(ABCMeta)):
                                 'instances reached (%d)', job, job.max_instances)
                             event = JobSubmissionEvent(EVENT_JOB_MAX_INSTANCES, job.id,
                                                        jobstore_alias, run_times)
-                            events.append(event)
+                            self._dispatch_event(event)
                         except BaseException:
                             self._logger.exception('Error submitting job "%s" to executor "%s"',
                                                    job, job.executor)
                         else:
                             event = JobSubmissionEvent(EVENT_JOB_SUBMITTED, job.id, jobstore_alias,
                                                        run_times)
-                            events.append(event)
+                            self._dispatch_event(event)
 
                         # Update the job if it has a next execution time.
                         # Otherwise remove it from the job store.
@@ -989,9 +989,9 @@ class BaseScheduler(six.with_metaclass(ABCMeta)):
                                                jobstore_next_run_time < next_wakeup_time):
                     next_wakeup_time = jobstore_next_run_time.astimezone(self.timezone)
 
-        # Dispatch collected events
-        for event in events:
-            self._dispatch_event(event)
+        # # Dispatch collected events
+        # for event in events:
+        #     self._dispatch_event(event)
 
         # Determine the delay until this method should be called again
         if self.state == STATE_PAUSED:
